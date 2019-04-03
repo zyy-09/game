@@ -16,6 +16,7 @@ public class game extends Applet implements Runnable {
 	tower t = new tower();
 	enemy e = new enemy();
 	bullet b = new bullet();
+	gold gold =new gold();
 
 	Graphics g;
 	// アプレットサイズ
@@ -29,7 +30,7 @@ public class game extends Applet implements Runnable {
 	int game_time = 0;
 
 	// 最初のゴールド
-	int gold = 10000;
+	
 	int tower_type;
 	int tower_coordinate_x, tower_coordinate_y;
 
@@ -85,7 +86,7 @@ public class game extends Applet implements Runnable {
 				for (int i = 0; i < 4; i++) {
 					if (e.getX() >= 80 + i * 43 && e.getX() <= 80 + (i + 1) * 43 && e.getY() >= 0 && e.getY() <= 60) {
 						// 購入判断
-						if (gold >= t.tower_ability_list[i][0])
+						if (gold.gold >= t.tower_ability_list[i][0])
 
 							if (i == 3) { // タワー売ります
 								tower_sell_check = true;
@@ -108,7 +109,8 @@ public class game extends Applet implements Runnable {
 							if (t.tower_list.get(i)[1] == tower_coordinate_x
 									&& t.tower_list.get(i)[2] == tower_coordinate_y) {
 								if (tower_create_check[tower_coordinate_x][tower_coordinate_y]) {
-									gold = (int) (gold + t.tower_ability_list[t.tower_list.get(i)[0]][0] * 0.5);
+									//game_gold = (int) (game_gold + t.tower_ability_list[t.tower_list.get(i)[0]][0] * 0.5);
+									gold.tower_sell((int) (t.tower_ability_list[t.tower_list.get(i)[0]][0] * 0.5));
 									t.kill(i);
 									tower_create_check[tower_coordinate_x][tower_coordinate_y] = false;
 								}
@@ -116,8 +118,9 @@ public class game extends Applet implements Runnable {
 						}
 						tower_sell_check = false;
 					} else if (tower_create_check[tower_coordinate_x][tower_coordinate_y] != true) {
-						// 購入操作
-						gold = gold - t.tower_ability_list[tower_type][0];
+						//購入操作
+						//game_gold = game_gold - t.tower_ability_list[tower_type][0];
+						gold.tower_buy(t.tower_ability_list[tower_type][0]);
 						tower_create_check[tower_coordinate_x][tower_coordinate_y] = true;
 
 						t.create(tower_type, tower_coordinate_x, tower_coordinate_y, game_time);
@@ -153,16 +156,16 @@ public class game extends Applet implements Runnable {
 		}
 	}
 
-	public void run() {
+    public void run() {
 		while (th != null) {
 			if (title == false) {
 				// ゲーム開始
-				
 				e.sortie(game_time);
 				b.attack(game_time, t.tower_list);
 				b.damage(game_time, e.enemy_list);
 				e.eat(game_time, t.tower_list);
 				e.over_check(game_time, e.enemy_list);
+				e.clear_check(game_time, e.enemy_list);
 				game_time = game_time + 1;
 				repaint();
 				sleep(100);
@@ -197,8 +200,12 @@ public class game extends Applet implements Runnable {
 			g.drawString("zombies eat your brain", 100, 200);
 			g.drawString("Game Over", 100, 250);
 			stop();
-		} else if (gclear) {
-			g.fillRect(80, 90, 50, 50);
+		} else if (clear_check) {
+			Font font1 = new Font("Arial", Font.PLAIN, 50);
+			g2.setFont(font1);
+			g.drawString("game clear", 100, 200);
+			g.drawString("congratulations！", 100, 250);
+			stop();
 		} else {
 			g2.clearRect(0, 0, getWidth(), getHeight());
 			g.drawImage(image_background, 0, 0, null);
@@ -207,7 +214,7 @@ public class game extends Applet implements Runnable {
 			g.setColor(Color.black);
 			Font font1 = new Font("Arial", Font.PLAIN, 50);
 			g2.setFont(font1);
-			g.drawString(gold + "", 260, 45);
+			g.drawString(gold.gold + "", 260, 45);
 		}
 		
 		// 確認アイコン
